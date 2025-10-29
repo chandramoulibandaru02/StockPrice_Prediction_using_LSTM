@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LSTM Price Predictor</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #007bff; /* Bright Blue for accents/buttons */
+            --secondary-color: #6c757d; /* Grey for minor text */
+            --background-color: #f8f9fa; /* Light Grey background */
+            --card-color: #ffffff; /* White card background */
+            --success-color: #28a745; /* Green for success */
+            --error-color: #dc3545; /* Red for errors */
+            --border-color: #ced4da; /* Light border */
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 40px 20px;
+            background-color: var(--background-color);
+            color: #343a40;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: var(--card-color);
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            text-align: center;
+            color: var(--primary-color);
+            margin-bottom: 30px;
+            font-weight: 500;
+        }
+        
+        /* --- Input Option Cards --- */
+        .input-group-header {
+            font-weight: 500;
+            margin-top: 25px;
+            margin-bottom: 10px;
+            font-size: 1.15em;
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 5px;
+        }
+
+        .input-section {
+            padding: 20px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            margin-bottom: 20px;
+            background-color: #fcfcfc;
+        }
+
+        /* --- Radio Button Styling --- */
+        .radio-options {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 15px;
+        }
+        .radio-options label {
+            display: flex;
+            align-items: center;
+            padding: 8px 15px;
+            border: 1px solid var(--primary-color);
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            font-weight: 400;
+            color: var(--primary-color);
+            background-color: rgba(0, 123, 255, 0.05); /* Light blue tint */
+        }
+        input[type="radio"] {
+            margin-right: 8px;
+            accent-color: var(--primary-color);
+        }
+        
+        /* Highlight selected radio option */
+        input[type="radio"]:checked + label {
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: 500;
+            box-shadow: 0 2px 5px rgba(0, 123, 255, 0.3);
+        }
+
+        /* --- Textarea and Number Inputs --- */
+        label {
+            display: block;
+            margin-top: 15px;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #495057;
+        }
+
+        input[type="number"], textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            box-sizing: border-box;
+            background-color: var(--card-color);
+            color: #343a40;
+            font-size: 1em;
+            transition: border-color 0.2s;
+        }
+        input[type="number"]:focus, textarea:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+            outline: none;
+        }
+
+        textarea {
+            height: 120px;
+            resize: vertical;
+        }
+        
+        .limit-inputs {
+            display: flex;
+            gap: 20px;
+            margin-top: 15px;
+        }
+        .limit-inputs > div {
+            flex: 1;
+        }
+
+        /* --- Button Styling --- */
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 30px;
+            font-size: 1.1em;
+            font-weight: 500;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        /* --- Result Styling --- */
+        #result {
+            margin-top: 35px;
+            padding: 20px;
+            border-radius: 8px;
+            background-color: #e9ecef;
+            border-left: 5px solid var(--primary-color);
+        }
+        #result .prediction-value {
+            font-size: 1.5em;
+            font-weight: 700;
+            color: var(--success-color);
+            margin-top: 5px;
+        }
+        #result .success-message { color: var(--success-color); font-weight: 500; }
+        #result .error-message { color: var(--error-color); font-weight: 500; }
+        #result hr { border-color: var(--border-color); margin: 15px 0; }
+        
+        .hidden-input {
+            opacity: 0.5;
+            pointer-events: none;
+            background-color: #f1f1f1;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>📈 Recurrent Neural Network (RNN) Predictor</h2>
+    
+    <form id="predictionForm">
+        
+        <div class="input-group-header">1. Select Input Source</div>
+        <div class="input-section">
+            <div class="radio-options">
+                <div>
+                    <input type="radio" id="manual_input" name="input_type" value="manual" checked>
+                    <label for="manual_input">Enter 100 Values</label>
+                </div>
+                <div>
+                    <input type="radio" id="generate_input" name="input_type" value="generate">
+                    <label for="generate_input">Auto-Generate (Test Data)</label>
+                </div>
+            </div>
+            
+            <div id="manual_section">
+                <label for="sequence">Last 100 Stock Prices:</label>
+                <textarea id="sequence" name="sequence" required 
+                    placeholder="Paste your 100 price values here (comma or new-line separated)"></textarea>
+            </div>
+        </div>
+
+        <div class="input-group-header">2. Define Training Range (Mandatory for Scaling)</div>
+        <div class="input-section">
+            <p style="font-size: 0.9em; color: var(--secondary-color);">
+                These limits are the **absolute minimum and maximum prices** from your entire original training dataset.
+            </p>
+            <div class="limit-inputs">
+                <div>
+                    <label for="min_limit">Min Price in Training Set:</label>
+                    <input type="number" id="min_limit" name="min_limit" step="any" required value="40.00">
+                </div>
+                <div>
+                    <label for="max_limit">Max Price in Training Set:</label>
+                    <input type="number" id="max_limit" name="max_limit" step="any" required value="190.00">
+                </div>
+            </div>
+        </div>
+        
+        <button type="submit">Predict Next Price</button>
+    </form>
+
+    <div id="result">
+        <strong>Prediction Results:</strong>
+        <p style="margin-top: 10px; color: var(--secondary-color);">Submit the form to see the forecast.</p>
+    </div>
+</div>
+
+<script>
+    // --- JavaScript for dynamic form control ---
+    const form = document.getElementById('predictionForm');
+    const sequenceTextarea = document.getElementById('sequence');
+    const manualInputRadio = document.getElementById('manual_input');
+    const generateInputRadio = document.getElementById('generate_input');
+
+    function toggleInputMode() {
+        if (manualInputRadio.checked) {
+            // Manual Mode: Enable and require input
+            sequenceTextarea.disabled = false;
+            sequenceTextarea.required = true;
+            sequenceTextarea.placeholder = "Paste your 100 price values here (comma or new-line separated)";
+            sequenceTextarea.classList.remove('hidden-input');
+        } else {
+            // Generate Mode: Clear, disable, and make input non-required
+            sequenceTextarea.value = '';
+            sequenceTextarea.disabled = true;
+            sequenceTextarea.required = false;
+            sequenceTextarea.placeholder = "Values will be generated automatically based on Min/Max limits.";
+            sequenceTextarea.classList.add('hidden-input');
+        }
+    }
+
+    // Attach listeners and run initial state check
+    manualInputRadio.addEventListener('change', toggleInputMode);
+    generateInputRadio.addEventListener('change', toggleInputMode);
+    toggleInputMode();
+
+
+    // --- JavaScript for form submission and API call (CRITICAL FIX) ---
+    form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        // 1. **CLEAN EXTRACTION** (Ensures numbers are retrieved directly)
+        const minLimit = parseFloat(document.getElementById('min_limit').value);
+        const maxLimit = parseFloat(document.getElementById('max_limit').value);
+        
+        let sequence = [];
+        const inputType = document.querySelector('input[name="input_type"]:checked').value;
+        const resultDiv = document.getElementById('result');
+
+        // 2. Process sequence based on user choice
+        if (inputType === 'manual') {
+            const sequenceRaw = sequenceTextarea.value;
+            sequence = sequenceRaw
+                .split(/[\s,]+/)
+                .filter(n => n && !isNaN(parseFloat(n)))
+                .map(n => parseFloat(n));
+            
+            if (sequence.length !== 100) {
+                resultDiv.innerHTML = `<p class="error-message">❌ Error: Manual input requires exactly 100 numeric values. Provided: ${sequence.length}</p>`;
+                return;
+            }
+        } else {
+            // Auto-generate mode: send empty array for the server to fill
+            sequence = []; 
+        }
+
+        // Final validation
+        if (minLimit >= maxLimit || isNaN(minLimit) || isNaN(maxLimit)) {
+            resultDiv.innerHTML = `<p class="error-message">❌ Error: Invalid Min/Max Limits. Ensure they are valid numbers and Min is less than Max.</p>`;
+            return;
+        }
+        
+        resultDiv.innerHTML = "<p><strong>Processing...</strong></p>";
+
+        try {
+            // 3. Send data to Flask API
+            const response = await fetch('/predict', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                // JSON.stringify ensures the final payload is correctly formatted
+                body: JSON.stringify({
+                    sequence: sequence, 
+                    min_limit: minLimit, 
+                    max_limit: maxLimit
+                }),
+            });
+
+            const data = await response.json();
+
+            // 4. Display the result
+            if (response.ok) {
+                const dataRangeText = inputType === 'generate' ? 
+                    `(System generated 100 values between $${minLimit.toFixed(2)} and $${maxLimit.toFixed(2)})` : 
+                    `(Using Min: $${minLimit.toFixed(2)}, Max: $${maxLimit.toFixed(2)})`;
+                
+                resultDiv.innerHTML = `
+                    <p class="success-message">✅ Prediction Successful!</p>
+                    <hr>
+                    <p>Predicted Price:</p>
+                    <p class="prediction-value">$${data.predicted_actual_price.toFixed(2)}</p>
+                    <p style="font-size: 0.9em; color: var(--secondary-color);">${dataRangeText}</p>
+                `;
+            } else {
+                resultDiv.innerHTML = `<p class="error-message">❌ Prediction Failed:</p> <p>${data.error || 'An unknown API error occurred.'}</p>`;
+            }
+
+        } catch (error) {
+            console.error('Fetch Error:', error);
+            resultDiv.innerHTML = `<p class="error-message">❌ Network Error.</p><p>Check if the Flask server is running and accessible.</p>`;
+        }
+    });
+</script>
+
+</body>
+</html>
