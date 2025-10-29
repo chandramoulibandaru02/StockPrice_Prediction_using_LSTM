@@ -4,124 +4,131 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LSTM Price Predictor</title>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary-color: #007bff; /* Bright Blue for accents/buttons */
-            --secondary-color: #6c757d; /* Grey for minor text */
-            --background-color: #f8f9fa; /* Light Grey background */
-            --card-color: #ffffff; /* White card background */
-            --success-color: #28a745; /* Green for success */
-            --error-color: #dc3545; /* Red for errors */
-            --border-color: #ced4da; /* Light border */
+            --primary-blue: #007bff;
+            --light-blue: #e9f5ff;
+            --text-dark: #2c3e50;
+            --text-light: #52667b;
+            --card-bg: #ffffff;
+            --border-color: #e0e6ed;
+            --success-color: #28a745;
+            --error-color: #dc3545;
         }
 
         body {
-            font-family: 'Roboto', sans-serif;
+            font-family: 'Montserrat', sans-serif;
             margin: 0;
             padding: 40px 20px;
-            background-color: var(--background-color);
-            color: #343a40;
+            background-color: var(--light-blue);
+            color: var(--text-dark);
             line-height: 1.6;
+            transition: background-color 0.3s;
         }
 
         .container {
             max-width: 800px;
             margin: 0 auto;
-            background: var(--card-color);
+            background: var(--card-bg);
             padding: 40px;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            animation: fadeIn 0.8s ease-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         h2 {
             text-align: center;
-            color: var(--primary-color);
+            color: var(--primary-blue);
             margin-bottom: 30px;
-            font-weight: 500;
+            font-weight: 700;
         }
         
-        /* --- Input Option Cards --- */
+        /* --- Input Sections --- */
         .input-group-header {
-            font-weight: 500;
-            margin-top: 25px;
-            margin-bottom: 10px;
-            font-size: 1.15em;
-            color: var(--primary-color);
-            border-bottom: 2px solid var(--border-color);
-            padding-bottom: 5px;
+            font-weight: 600;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+            color: var(--primary-blue);
+            border-left: 4px solid var(--primary-blue);
+            padding-left: 10px;
         }
 
         .input-section {
             padding: 20px;
             border: 1px solid var(--border-color);
-            border-radius: 8px;
+            border-radius: 12px;
             margin-bottom: 20px;
             background-color: #fcfcfc;
+            transition: box-shadow 0.3s;
+        }
+        .input-section:focus-within {
+             box-shadow: 0 0 15px rgba(0, 123, 255, 0.15);
         }
 
-        /* --- Radio Button Styling --- */
+        /* --- Radio Button Styling (Choice Tabs) --- */
         .radio-options {
             display: flex;
-            gap: 20px;
+            gap: 15px;
             margin-bottom: 15px;
         }
+        .radio-options input[type="radio"] {
+            display: none;
+        }
         .radio-options label {
-            display: flex;
-            align-items: center;
-            padding: 8px 15px;
-            border: 1px solid var(--primary-color);
-            border-radius: 5px;
+            flex-grow: 1;
+            text-align: center;
+            padding: 10px 15px;
+            border: 2px solid var(--primary-blue);
+            border-radius: 8px;
             cursor: pointer;
-            transition: all 0.2s ease-in-out;
-            font-weight: 400;
-            color: var(--primary-color);
-            background-color: rgba(0, 123, 255, 0.05); /* Light blue tint */
+            transition: all 0.3s;
+            color: var(--primary-blue);
+            background-color: var(--card-bg);
+            font-weight: 600;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            margin-top: 0; /* Override default label margin */
         }
-        input[type="radio"] {
-            margin-right: 8px;
-            accent-color: var(--primary-color);
-        }
-        
-        /* Highlight selected radio option */
-        input[type="radio"]:checked + label {
-            background-color: var(--primary-color);
+        .radio-options input[type="radio"]:checked + label {
+            background-color: var(--primary-blue);
             color: white;
-            font-weight: 500;
-            box-shadow: 0 2px 5px rgba(0, 123, 255, 0.3);
+            box-shadow: 0 4px 8px rgba(0, 123, 255, 0.4);
+            transform: translateY(-2px);
         }
 
-        /* --- Textarea and Number Inputs --- */
+        /* --- Input Fields --- */
         label {
             display: block;
             margin-top: 15px;
             margin-bottom: 5px;
             font-weight: 500;
-            color: #495057;
+            color: var(--text-light);
         }
-
-        input[type="number"], textarea {
+        input[type="text"], input[type="number"], textarea {
             width: 100%;
-            padding: 10px;
+            padding: 12px;
             border: 1px solid var(--border-color);
-            border-radius: 5px;
+            border-radius: 8px;
             box-sizing: border-box;
-            background-color: var(--card-color);
-            color: #343a40;
+            background-color: #f9f9f9;
+            color: var(--text-dark);
             font-size: 1em;
-            transition: border-color 0.2s;
+            transition: border-color 0.3s;
         }
-        input[type="number"]:focus, textarea:focus {
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        input[type="text"]:focus, input[type="number"]:focus, textarea:focus {
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.15);
             outline: none;
         }
-
         textarea {
             height: 120px;
             resize: vertical;
         }
-        
         .limit-inputs {
             display: flex;
             gap: 20px;
@@ -130,54 +137,89 @@
         .limit-inputs > div {
             flex: 1;
         }
+        .hidden-input {
+            opacity: 0.4;
+            pointer-events: none;
+            background-color: #f1f1f1;
+        }
 
-        /* --- Button Styling --- */
+        /* --- Button & Loading Animation --- */
         button {
-            background-color: var(--primary-color);
+            background-color: var(--primary-blue);
             color: white;
-            padding: 12px 20px;
+            padding: 15px 20px;
             border: none;
-            border-radius: 5px;
+            border-radius: 8px;
             cursor: pointer;
             width: 100%;
-            margin-top: 30px;
-            font-size: 1.1em;
-            font-weight: 500;
-            transition: background-color 0.3s ease;
+            margin-top: 40px;
+            font-size: 1.15em;
+            font-weight: 600;
+            transition: background-color 0.3s, transform 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-        button:hover {
+        button:hover:not(:disabled) {
             background-color: #0056b3;
+            transform: translateY(-1px);
+        }
+        button:disabled {
+            background-color: #a0c4ff;
+            cursor: not-allowed;
+        }
+        
+        .spinner {
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top: 3px solid white;
+            border-radius: 50%;
+            width: 16px;
+            height: 16px;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+            display: none;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
 
         /* --- Result Styling --- */
         #result {
             margin-top: 35px;
-            padding: 20px;
-            border-radius: 8px;
-            background-color: #e9ecef;
-            border-left: 5px solid var(--primary-color);
+            padding: 25px;
+            border-radius: 12px;
+            background-color: #f0f8ff;
+            border: 1px solid var(--primary-blue);
+            animation: slideIn 0.5s ease-out;
         }
+        @keyframes slideIn {
+             from { opacity: 0; transform: translateY(10px); }
+             to { opacity: 1; transform: translateY(0); }
+        }
+
         #result .prediction-value {
-            font-size: 1.5em;
+            font-size: 2em;
             font-weight: 700;
             color: var(--success-color);
-            margin-top: 5px;
+            margin-top: 10px;
+            display: block;
         }
-        #result .success-message { color: var(--success-color); font-weight: 500; }
-        #result .error-message { color: var(--error-color); font-weight: 500; }
+        #result .success-message { color: var(--success-color); font-weight: 600; }
+        #result .error-message { color: var(--error-color); font-weight: 600; }
         #result hr { border-color: var(--border-color); margin: 15px 0; }
         
-        .hidden-input {
-            opacity: 0.5;
-            pointer-events: none;
-            background-color: #f1f1f1;
+        .source-info {
+            font-size: 0.9em;
+            color: var(--text-light);
+            margin-top: 10px;
         }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>📈 Recurrent Neural Network (RNN) Predictor</h2>
+    <h2>📈 LSTM Stock Price Forecasting Interface</h2>
     
     <form id="predictionForm">
         
@@ -185,26 +227,33 @@
         <div class="input-section">
             <div class="radio-options">
                 <div>
-                    <input type="radio" id="manual_input" name="input_type" value="manual" checked>
-                    <label for="manual_input">Enter 100 Values</label>
+                    <input type="radio" id="live_data" name="input_type" value="live" checked>
+                    <label for="live_data">Fetch Live Ticker Data</label>
                 </div>
                 <div>
-                    <input type="radio" id="generate_input" name="input_type" value="generate">
-                    <label for="generate_input">Auto-Generate (Test Data)</label>
+                    <input type="radio" id="manual_input" name="input_type" value="manual">
+                    <label for="manual_input">Manual Input (100 Values)</label>
                 </div>
             </div>
             
-            <div id="manual_section">
-                <label for="sequence">Last 100 Stock Prices:</label>
-                <textarea id="sequence" name="sequence" required 
-                    placeholder="Paste your 100 price values here (comma or new-line separated)"></textarea>
+            <div id="data_input_section">
+                <div id="live_data_input">
+                    <label for="ticker">Stock Ticker Symbol (e.g., AAPL, GOOG):</label>
+                    <input type="text" id="ticker" name="ticker" required placeholder="Enter Ticker Symbol">
+                </div>
+                
+                <div id="manual_data_input" style="display: none;">
+                    <label for="sequence">Last 100 Stock Prices:</label>
+                    <textarea id="sequence" name="sequence" required 
+                        placeholder="Paste your 100 price values here (comma or new-line separated)"></textarea>
+                </div>
             </div>
         </div>
 
-        <div class="input-group-header">2. Define Training Range (Mandatory for Scaling)</div>
+        <div class="input-group-header">2. Define Training Range (For Scaling)</div>
         <div class="input-section">
-            <p style="font-size: 0.9em; color: var(--secondary-color);">
-                These limits are the **absolute minimum and maximum prices** from your entire original training dataset.
+            <p style="font-size: 0.9em; color: var(--text-light);">
+                Set the **absolute min and max prices** from your entire original training dataset. This is essential for accurate scaling.
             </p>
             <div class="limit-inputs">
                 <div>
@@ -218,59 +267,80 @@
             </div>
         </div>
         
-        <button type="submit">Predict Next Price</button>
+        <button type="submit" id="predictButton">
+            <div class="spinner"></div> Predict Next Price
+        </button>
     </form>
 
     <div id="result">
         <strong>Prediction Results:</strong>
-        <p style="margin-top: 10px; color: var(--secondary-color);">Submit the form to see the forecast.</p>
+        <p style="margin-top: 10px; color: var(--text-light);">Select your input method and submit to get a forecast.</p>
     </div>
 </div>
 
 <script>
-    // --- JavaScript for dynamic form control ---
+    // --- DOM Elements ---
     const form = document.getElementById('predictionForm');
-    const sequenceTextarea = document.getElementById('sequence');
+    const liveInputSection = document.getElementById('live_data_input');
+    const manualInputSection = document.getElementById('manual_data_input');
+    const liveInputRadio = document.getElementById('live_data');
     const manualInputRadio = document.getElementById('manual_input');
-    const generateInputRadio = document.getElementById('generate_input');
+    const tickerInput = document.getElementById('ticker');
+    const sequenceTextarea = document.getElementById('sequence');
+    const predictButton = document.getElementById('predictButton');
+    const spinner = document.querySelector('.spinner');
+    const resultDiv = document.getElementById('result');
 
+    // --- Dynamic Input Toggle Logic ---
     function toggleInputMode() {
-        if (manualInputRadio.checked) {
-            // Manual Mode: Enable and require input
-            sequenceTextarea.disabled = false;
-            sequenceTextarea.required = true;
-            sequenceTextarea.placeholder = "Paste your 100 price values here (comma or new-line separated)";
-            sequenceTextarea.classList.remove('hidden-input');
-        } else {
-            // Generate Mode: Clear, disable, and make input non-required
-            sequenceTextarea.value = '';
-            sequenceTextarea.disabled = true;
+        if (liveInputRadio.checked) {
+            // Live Data Mode: Show Ticker input, require it, hide textarea
+            liveInputSection.style.display = 'block';
+            manualInputSection.style.display = 'none';
+            tickerInput.required = true;
             sequenceTextarea.required = false;
-            sequenceTextarea.placeholder = "Values will be generated automatically based on Min/Max limits.";
-            sequenceTextarea.classList.add('hidden-input');
+        } else {
+            // Manual Input Mode: Show textarea, require it, hide Ticker input
+            liveInputSection.style.display = 'none';
+            manualInputSection.style.display = 'block';
+            tickerInput.required = false;
+            sequenceTextarea.required = true;
         }
     }
 
     // Attach listeners and run initial state check
+    liveInputRadio.addEventListener('change', toggleInputMode);
     manualInputRadio.addEventListener('change', toggleInputMode);
-    generateInputRadio.addEventListener('change', toggleInputMode);
     toggleInputMode();
 
 
-    // --- JavaScript for form submission and API call (CRITICAL FIX) ---
+    // --- Form Submission and API Call Logic ---
     form.addEventListener('submit', async function(e) {
         e.preventDefault();
 
-        // 1. **CLEAN EXTRACTION** (Ensures numbers are retrieved directly)
+        // Show loading state
+        predictButton.disabled = true;
+        predictButton.innerHTML = '<div class="spinner" style="display: block;"></div> Processing...';
+
         const minLimit = parseFloat(document.getElementById('min_limit').value);
         const maxLimit = parseFloat(document.getElementById('max_limit').value);
         
         let sequence = [];
-        const inputType = document.querySelector('input[name="input_type"]:checked').value;
-        const resultDiv = document.getElementById('result');
-
-        // 2. Process sequence based on user choice
-        if (inputType === 'manual') {
+        let ticker = null;
+        
+        // 1. Prepare data based on selected mode
+        if (liveInputRadio.checked) {
+            // Mode: Fetch Live Data
+            ticker = tickerInput.value.trim().toUpperCase();
+            if (!ticker) {
+                resultDiv.innerHTML = `<p class="error-message">❌ Error: Please enter a Ticker Symbol.</p>`;
+                resetButton();
+                return;
+            }
+            // Sequence is sent as empty, server fetches based on ticker
+            sequence = []; 
+        } else {
+            // Mode: Manual Input
             const sequenceRaw = sequenceTextarea.value;
             sequence = sequenceRaw
                 .split(/[\s,]+/)
@@ -279,48 +349,45 @@
             
             if (sequence.length !== 100) {
                 resultDiv.innerHTML = `<p class="error-message">❌ Error: Manual input requires exactly 100 numeric values. Provided: ${sequence.length}</p>`;
+                resetButton();
                 return;
             }
-        } else {
-            // Auto-generate mode: send empty array for the server to fill
-            sequence = []; 
         }
 
         // Final validation
         if (minLimit >= maxLimit || isNaN(minLimit) || isNaN(maxLimit)) {
             resultDiv.innerHTML = `<p class="error-message">❌ Error: Invalid Min/Max Limits. Ensure they are valid numbers and Min is less than Max.</p>`;
+            resetButton();
             return;
         }
         
-        resultDiv.innerHTML = "<p><strong>Processing...</strong></p>";
-
         try {
-            // 3. Send data to Flask API
+            // 2. Send data to Flask API
             const response = await fetch('/predict', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                // JSON.stringify ensures the final payload is correctly formatted
                 body: JSON.stringify({
                     sequence: sequence, 
                     min_limit: minLimit, 
-                    max_limit: maxLimit
+                    max_limit: maxLimit,
+                    ticker: ticker // Send null if manual, send symbol if live
                 }),
             });
 
             const data = await response.json();
 
-            // 4. Display the result
+            // 3. Display the result
             if (response.ok) {
-                const dataRangeText = inputType === 'generate' ? 
-                    `(System generated 100 values between $${minLimit.toFixed(2)} and $${maxLimit.toFixed(2)})` : 
-                    `(Using Min: $${minLimit.toFixed(2)}, Max: $${maxLimit.toFixed(2)})`;
+                const dataRangeText = liveInputRadio.checked ? 
+                    `Data Source: Live Data for ${ticker} | Range: $${minLimit.toFixed(2)} to $${maxLimit.toFixed(2)}` : 
+                    `Data Source: Manual Input | Range: $${minLimit.toFixed(2)} to $${maxLimit.toFixed(2)}`;
                 
                 resultDiv.innerHTML = `
                     <p class="success-message">✅ Prediction Successful!</p>
                     <hr>
-                    <p>Predicted Price:</p>
+                    <p>Predicted Next Price:</p>
                     <p class="prediction-value">$${data.predicted_actual_price.toFixed(2)}</p>
-                    <p style="font-size: 0.9em; color: var(--secondary-color);">${dataRangeText}</p>
+                    <p class="source-info">${dataRangeText}</p>
                 `;
             } else {
                 resultDiv.innerHTML = `<p class="error-message">❌ Prediction Failed:</p> <p>${data.error || 'An unknown API error occurred.'}</p>`;
@@ -329,8 +396,16 @@
         } catch (error) {
             console.error('Fetch Error:', error);
             resultDiv.innerHTML = `<p class="error-message">❌ Network Error.</p><p>Check if the Flask server is running and accessible.</p>`;
+        } finally {
+            resetButton();
         }
     });
+
+    function resetButton() {
+        // Reset button state
+        predictButton.disabled = false;
+        predictButton.innerHTML = 'Predict Next Price';
+    }
 </script>
 
 </body>
