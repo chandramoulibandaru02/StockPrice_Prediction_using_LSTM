@@ -363,7 +363,7 @@
         
         try {
             // 2. Send data to Flask API
-            const response = await fetch('/predict', {
+            const response = await fetch('https://chandramoulibandaru02-stockprice.hf.space/predict', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -410,3 +410,4 @@
 
 </body>
 </html>
+
